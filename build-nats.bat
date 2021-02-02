@@ -36,6 +36,8 @@ cd repos\protobuf-c
 git checkout v1.3.3
 cd %~dp0
 
+if exist "%VCPKG_HOME%\installed\x64-windows\bin\nats.dll" goto END
+
 mkdir build
 cd build
 
@@ -51,6 +53,20 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_HOME%\scripts\buildsystems\vcpkg.cmake -D
 
 cmake --build . --config Debug
 cmake --build . --config Release
+
+cd %~dp0
+
+mkdir %VCPKG_HOME%\installed\x64-windows\include\nats
+copy src/nats.h %VCPKG_HOME%\installed\x64-windows\include\nats
+copy src/version.h %VCPKG_HOME%\installed\x64-windows\include\nats
+copy src/status.h %VCPKG_HOME%\installed\x64-windows\include\nats
+
+copy  build\src\Release\*.lib %VCPKG_HOME%\installed\x64-windows\lib
+copy  build\src\Release\*.dll %VCPKG_HOME%\installed\x64-windows\bin
+
+copy  build\src\Debug\*.lib %VCPKG_HOME%\installed\x64-windows\debug\lib
+copy  build\src\Debug\*.dll %VCPKG_HOME%\installed\x64-windows\debug\bin
+copy  build\src\Debug\*.pdb %VCPKG_HOME%\installed\x64-windows\debug\bin
 
 goto END
 
