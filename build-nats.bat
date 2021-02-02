@@ -1,6 +1,4 @@
-
-
-@echo off
+@echo OFF
 
 set ERROR_CODE=0
 
@@ -31,35 +29,42 @@ if not exist "%VCPKG_HOME%/installed/x64-windows/include/zlib.h"      %VCPKG_CMD
 if not exist "%VCPKG_HOME%/installed/x64-windows/include/Protobuf"     %VCPKG_CMD% install Protobuf --triplet x64-windows
 
 REM pull protobuf-c and switch to a known tag 
+if exist repos\protobuf-c goto skipNatsClone:
 git clone https://github.com/protobuf-c/protobuf-c.git repos\protobuf-c
 cd repos\protobuf-c
 git checkout v1.3.3
 cd %~dp0
 
-if exist "%VCPKG_HOME%\installed\x64-windows\bin\nats.dll" goto END
+REM copy protobuf-c into our project.. easier then trying to get that project to build/link/export on windows
+mkdir  src\include\protobuf-c\
+copy repos\protobuf-c\protobuf-c\protobuf-c.h src\include\protobuf-c\protobuf-c.h
+copy repos\protobuf-c\protobuf-c\protobuf-c.h src\protobuf-c.h
+copy repos\protobuf-c\protobuf-c\protobuf-c.c src\protobuf-c.c
+mkdir src\protobuf-c\
+copy repos\protobuf-c\protobuf-c\protobuf-c.h src\protobuf-c\protobuf-c.h
 
+:skipNatsClone
+
+if exist build goto END
+
+cd %~dp0
 mkdir build
 cd build
 
-REM copy protobuf-c into our project.. easier then trying to get that project to build/link/export on windows
-mkdir  ..\src\include\protobuf-c\
-copy ..\repos\protobuf-c\protobuf-c\protobuf-c.h ..\src\include\protobuf-c\protobuf-c.h
-copy ..\repos\protobuf-c\protobuf-c\protobuf-c.h ..\src\protobuf-c.h
-copy ..\repos\protobuf-c\protobuf-c\protobuf-c.c ..\src\protobuf-c.c
-mkdir  ..\src\protobuf-c\
-copy ..\repos\protobuf-c\protobuf-c\protobuf-c.h ..\src\protobuf-c\protobuf-c.h
-
 cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_HOME%\scripts\buildsystems\vcpkg.cmake -DNATS_BUILD_STREAMING=ON
+
 
 cmake --build . --config Debug
 cmake --build . --config Release
 
+
+
 cd %~dp0
 
 mkdir %VCPKG_HOME%\installed\x64-windows\include\nats
-copy src/nats.h %VCPKG_HOME%\installed\x64-windows\include\nats
-copy src/version.h %VCPKG_HOME%\installed\x64-windows\include\nats
-copy src/status.h %VCPKG_HOME%\installed\x64-windows\include\nats
+copy src\nats.h %VCPKG_HOME%\installed\x64-windows\include\nats
+copy src\version.h %VCPKG_HOME%\installed\x64-windows\include\nats
+copy src\status.h %VCPKG_HOME%\installed\x64-windows\include\nats
 
 copy  build\src\Release\*.lib %VCPKG_HOME%\installed\x64-windows\lib
 copy  build\src\Release\*.dll %VCPKG_HOME%\installed\x64-windows\bin
