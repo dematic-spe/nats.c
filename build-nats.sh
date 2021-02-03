@@ -7,6 +7,7 @@
 if [ ! -x "$VCPKG_HOME" ] ; then
   echo "The VCPKG_HOME environment variable is not defined correctly" >&2
   echo "This environment variable is needed to run this program" >&2
+  echo "Hint: export VCPKG_HOME=<somedir> example export VCPKG_HOME=~/vcpkg"
   exit 1
 fi
 
@@ -31,13 +32,17 @@ if [ ! -d "$VCPKG_HOME/installed/x64-linux/include/openssl"      ]; then $VCPKG_
 if [ ! -d "$VCPKG_HOME/installed/x64-linux/include/zlib.h"       ]; then $VCPKG_CMD install zlib --triplet x64-linux       ; fi
 if [ ! -d "$VCPKG_HOME/installed/x64-linux/include/protobuf-c"   ]; then $VCPKG_CMD install protobuf-c --triplet x64-linux ; fi
 
-mkdir build
-cd build
+mkdir debug
+cd debug
+cmake .. -DNATS_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake -DNATS_BUILD_STREAMING=ON
+cmake --build .  
+cd ../
 
-cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake -DNATS_BUILD_STREAMING=ON
-
-cmake --build . --config Debug
-cmake --build . --config Release
+mkdir release
+cd release
+cmake .. -DNATS_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake -DNATS_BUILD_STREAMING=ON
+cmake --build .  
+cd ../
 
 cd ..
 echo Integrate nats build with vcpkg
