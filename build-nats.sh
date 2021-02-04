@@ -34,27 +34,22 @@ if [ ! -d "$VCPKG_HOME/installed/x64-linux/include/protobuf-c"   ]; then $VCPKG_
 
 mkdir debug
 cd debug
-cmake .. -DNATS_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake -DNATS_BUILD_STREAMING=ON
+cmake .. -DNATS_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake \
+	 -DCMAKE_INSTALL_PREFIX:PATH=$VCPKG_HOME/installed/x64-linux/debug \
+	 -DCMAKE_INSTALL_LIBDIR:PATH=$VCPKG_HOME/installed/x64-linux/debug/lib \
+	 -DNATS_BUILD_STREAMING=ON
+
 cmake --build .  
+cmake --install .  
 cd ../
 
 mkdir release
 cd release
-cmake .. -DNATS_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake -DNATS_BUILD_STREAMING=ON
+cmake .. -DNATS_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$VCPKG_HOME/scripts/buildsystems/vcpkg.cmake \
+	 -DCMAKE_INSTALL_PREFIX:PATH=$VCPKG_HOME/installed/x64-linux/ \
+	 -DCMAKE_INSTALL_LIBDIR:PATH=$VCPKG_HOME/installed/x64-linux/lib \
+	 -DNATS_BUILD_STREAMING=ON
 cmake --build .  
+cmake --install .  
 cd ../
 
-cd ..
-echo Integrate nats build with vcpkg
-
-mkdir "$VCPKG_HOME/installed/x64-linux/include/nats"
-cp src/nats.h "$VCPKG_HOME/installed/x64-linux/include/nats"
-cp src/version.h "$VCPKG_HOME/installed/x64-linux/include/nats"
-cp src/status.h "$VCPKG_HOME/installed/x64-linux/include/nats"
-
-cp  build/src/Release/*.lib "$VCPKG_HOME/installed/x64-linux/lib"
-cp  build/src/Release/*.dll "$VCPKG_HOME/installed/x64-linux/bin"
-
-cp  build/src/Debug/*.lib "$VCPKG_HOME/installed/x64-linux/debug/lib"
-cp  build/src/Debug/*.dll "$VCPKG_HOME/installed/x64-linux/debug/bin"
-cp  build/src/Debug/*.pdb "$VCPKG_HOME/installed/x64-linux/debug/bin"
